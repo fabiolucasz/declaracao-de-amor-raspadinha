@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raspadinha Romântica</title>
+    <title>Surpresa!!!</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* Garante que não haja rolagem */
+            touch-action: none; /* Evita o movimento da página no celular */
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
             background-color: #222;
             color: white;
-            overflow: hidden;
-            touch-action: none;
         }
         .instrucao {
             text-align: center;
@@ -66,17 +67,31 @@
             0% { transform: translateY(-10vh) scale(1); opacity: 1; }
             100% { transform: translateY(100vh) scale(0.5); opacity: 0; }
         }
-        #playButton {
-            position: absolute;
-            opacity: 0;
-            pointer-events: none;
+        #startButton {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            font-size: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 10;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
+
+    <!-- Tela inicial para destravar o áudio no celular -->
+    <div id="startButton">Clique para começar 🎶</div>
+
     <div class="instrucao">
         <h1>Parabéns!!! Você acabou de ganhar um prêmio.</h1>
         <ul>
+            <li>Clique no botão para começar.</li>
             <li>Raspe para descobrir sua recompensa!</li>
         </ul>
     </div>
@@ -88,13 +103,23 @@
     </div>
 
     <audio id="loveSong" src="./images/musica.mp3"></audio>
-    <button id="playButton">Play</button>
 
     <script>
         const canvas = document.getElementById('scratchCanvas');
         const ctx = canvas.getContext('2d');
         const loveSong = document.getElementById('loveSong');
-        const playButton = document.getElementById('playButton');
+        const startButton = document.getElementById('startButton');
+
+        let isAudioUnlocked = false;
+
+        // Tela inicial para destravar o áudio no celular
+        startButton.addEventListener('click', () => {
+            loveSong.play().then(() => {
+                loveSong.pause();
+                isAudioUnlocked = true;
+                startButton.style.display = 'none'; // Remove o botão após clique
+            }).catch(err => console.log("Erro ao destravar áudio:", err));
+        });
 
         canvas.width = canvas.offsetWidth;
         canvas.height = canvas.offsetHeight;
@@ -112,8 +137,8 @@
             isDrawing = true;
             draw(e);
 
-            if (!musicPlayed) {
-                playButton.click();
+            if (!musicPlayed && isAudioUnlocked) {
+                loveSong.play();
                 musicPlayed = true;
             }
         };
@@ -151,10 +176,6 @@
         canvas.addEventListener('touchstart', startDrawing);
         canvas.addEventListener('touchend', stopDrawing);
         canvas.addEventListener('touchmove', draw);
-
-        playButton.addEventListener('click', () => {
-            loveSong.play().catch(error => console.log("Erro ao tocar música:", error));
-        });
 
         function startHeartsEffect() {
             setInterval(() => {
