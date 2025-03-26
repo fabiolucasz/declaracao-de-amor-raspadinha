@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Raspadinha Romântica</title>
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            margin: 0;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -15,24 +15,21 @@
             background-color: #222;
             color: white;
             overflow: hidden;
+            touch-action: none;
         }
-
         .instrucao {
             text-align: center;
             margin-bottom: 20px;
         }
-
         .instrucao ul {
             list-style: none;
             padding: 0;
         }
-
         #canvasContainer {
             position: relative;
             width: 300px;
             height: 300px;
         }
-
         #hiddenImage {
             width: 100%;
             height: 100%;
@@ -40,7 +37,6 @@
             object-position: top;
             border-radius: 10px;
         }
-
         .text-overlay {
             position: absolute;
             top: 10px;
@@ -51,7 +47,6 @@
             color: white;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
         }
-
         canvas {
             position: absolute;
             top: 0;
@@ -61,17 +56,20 @@
             border-radius: 10px;
             cursor: crosshair;
         }
-
         .heart {
             position: absolute;
             color: red;
             font-size: 24px;
             animation: fall 3s linear infinite;
         }
-
         @keyframes fall {
             0% { transform: translateY(-10vh) scale(1); opacity: 1; }
             100% { transform: translateY(100vh) scale(0.5); opacity: 0; }
+        }
+        #playButton {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -89,12 +87,14 @@
         <canvas id="scratchCanvas"></canvas>
     </div>
 
-    <audio id="loveSong" src="./images/musica.mp3"></audio> <!-- Música romântica -->
+    <audio id="loveSong" src="./images/musica.mp3"></audio>
+    <button id="playButton">Play</button>
 
     <script>
         const canvas = document.getElementById('scratchCanvas');
         const ctx = canvas.getContext('2d');
         const loveSong = document.getElementById('loveSong');
+        const playButton = document.getElementById('playButton');
 
         canvas.width = canvas.offsetWidth;
         canvas.height = canvas.offsetHeight;
@@ -111,6 +111,11 @@
         const startDrawing = (e) => {
             isDrawing = true;
             draw(e);
+
+            if (!musicPlayed) {
+                playButton.click();
+                musicPlayed = true;
+            }
         };
 
         const stopDrawing = () => {
@@ -130,14 +135,8 @@
             ctx.arc(x, y, 20, 0, Math.PI * 2);
             ctx.fill();
 
-            revealedPixels += Math.PI * 20 * 20; // Aproximadamente a área removida
-
+            revealedPixels += Math.PI * 20 * 20;
             const percentRevealed = (revealedPixels / totalPixels) * 100;
-
-            if (percentRevealed > 80 && !musicPlayed) {
-                loveSong.play();
-                musicPlayed = true;
-            }
 
             if (percentRevealed > 95 && !heartsActivated) {
                 startHeartsEffect();
@@ -152,6 +151,10 @@
         canvas.addEventListener('touchstart', startDrawing);
         canvas.addEventListener('touchend', stopDrawing);
         canvas.addEventListener('touchmove', draw);
+
+        playButton.addEventListener('click', () => {
+            loveSong.play().catch(error => console.log("Erro ao tocar música:", error));
+        });
 
         function startHeartsEffect() {
             setInterval(() => {
