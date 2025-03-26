@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raspadinha Romântica</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #222;
+            color: white;
+            overflow: hidden;
+        }
+
+        .instrucao {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .instrucao ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        #canvasContainer {
+            position: relative;
+            width: 300px;
+            height: 300px;
+        }
+
+        #hiddenImage {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top;
+            border-radius: 10px;
+        }
+
+        .text-overlay {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+            cursor: crosshair;
+        }
+
+        .heart {
+            position: absolute;
+            color: red;
+            font-size: 24px;
+            animation: fall 3s linear infinite;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10vh) scale(1); opacity: 1; }
+            100% { transform: translateY(100vh) scale(0.5); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="instrucao">
+        <h1>Parabéns!!! Você acabou de ganhar um prêmio.</h1>
+        <ul>
+            <li>Raspe para descobrir sua recompensa!</li>
+        </ul>
+    </div>
+
+    <div id="canvasContainer">
+        <div class="text-overlay">Te amo! ❤️</div>
+        <img id="hiddenImage" src="./images/20250304.jpg" alt="Imagem oculta">
+        <canvas id="scratchCanvas"></canvas>
+    </div>
+
+    <audio id="loveSong" src="./images/musica.mp3"></audio> <!-- Música romântica -->
+
+    <script>
+        const canvas = document.getElementById('scratchCanvas');
+        const ctx = canvas.getContext('2d');
+        const loveSong = document.getElementById('loveSong');
+
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+
+        ctx.fillStyle = 'gray';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        let isDrawing = false;
+        let revealedPixels = 0;
+        let totalPixels = canvas.width * canvas.height;
+        let musicPlayed = false;
+        let heartsActivated = false;
+
+        const startDrawing = (e) => {
+            isDrawing = true;
+            draw(e);
+        };
+
+        const stopDrawing = () => {
+            isDrawing = false;
+            ctx.beginPath();
+        };
+
+        const draw = (e) => {
+            if (!isDrawing) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+            const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(x, y, 20, 0, Math.PI * 2);
+            ctx.fill();
+
+            revealedPixels += Math.PI * 20 * 20; // Aproximadamente a área removida
+
+            const percentRevealed = (revealedPixels / totalPixels) * 100;
+
+            if (percentRevealed > 80 && !musicPlayed) {
+                loveSong.play();
+                musicPlayed = true;
+            }
+
+            if (percentRevealed > 95 && !heartsActivated) {
+                startHeartsEffect();
+                heartsActivated = true;
+            }
+        };
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mousemove', draw);
+
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchend', stopDrawing);
+        canvas.addEventListener('touchmove', draw);
+
+        function startHeartsEffect() {
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.classList.add('heart');
+                heart.innerHTML = '❤️';
+                document.body.appendChild(heart);
+
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDuration = Math.random() * 2 + 3 + 's';
+
+                setTimeout(() => {
+                    heart.remove();
+                }, 5000);
+            }, 200);
+        }
+    </script>
+</body>
+</html>
