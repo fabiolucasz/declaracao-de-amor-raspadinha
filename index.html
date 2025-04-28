@@ -9,8 +9,8 @@
         html, body {
             width: 100%;
             height: 100%;
-            overflow: hidden; /* Garante que não haja rolagem */
-            touch-action: none; /* Evita o movimento da página no celular */
+            overflow: hidden;
+            touch-action: none; 
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -98,10 +98,11 @@
 
     <div id="canvasContainer">
         <div class="text-overlay">Te amo! ❤️</div>
-        <img id="hiddenImage" src="./images/20250304.jpg" alt="Imagem oculta">
+        <!--Altere aqui a sua foto-->
+        <img id="hiddenImage" src="./images/foto.jpg" alt="Imagem oculta">
         <canvas id="scratchCanvas"></canvas>
     </div>
-
+    <!--Altere aqui a sua música-->
     <audio id="loveSong" src="./images/musica.mp3"></audio>
 
     <script>
